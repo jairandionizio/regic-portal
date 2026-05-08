@@ -3,855 +3,1340 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal REGIC — Regiões de Influência das Cidades | IBGE 2018</title>
-<meta name="description" content="Portal interativo para explorar os dados da pesquisa REGIC 2018 do IBGE — hierarquia urbana, regiões de influência e redes geográficas do Brasil.">
+<title>REGIC 2018 — Rede Urbana do Brasil</title>
+<meta name="description" content="Portal interativo REGIC 2018 — explore a hierarquia urbana e redes de influência das cidades brasileiras.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #ffffff;
-    --bg2: #f5f5f3;
-    --bg3: #eeecea;
-    --text: #1a1a18;
-    --text2: #5f5e5a;
-    --text3: #888780;
-    --border: rgba(0,0,0,0.12);
-    --border2: rgba(0,0,0,0.22);
-    --radius: 8px;
-    --radius-lg: 12px;
-    --accent: #1D9E75;
-    --accent-light: #E1F5EE;
-    --font: 'IBM Plex Sans', system-ui, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1c1c1a;
-      --bg2: #242422;
-      --bg3: #2c2c2a;
-      --text: #f0ede8;
-      --text2: #b4b2a9;
-      --text3: #888780;
-      --border: rgba(255,255,255,0.1);
-      --border2: rgba(255,255,255,0.2);
-      --accent: #5DCAA5;
-      --accent-light: #04342C;
-    }
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: var(--font);
-    background: var(--bg3);
-    color: var(--text);
-    font-size: 15px;
-    line-height: 1.6;
-    min-height: 100vh;
-  }
+:root {
+  --c0: #0a0a08;
+  --c1: #111110;
+  --c2: #1a1a17;
+  --c3: #252521;
+  --c4: #333330;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0ede6;
+  --text2: #a8a49a;
+  --text3: #666360;
+  --gold: #E8C547;
+  --gold2: #f0d070;
+  --green: #4CAF82;
+  --blue: #5B9BD5;
+  --purple: #8B74D4;
+  --orange: #E07B3A;
+  --red: #D45B5B;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--c0);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-  /* HEADER */
-  header {
-    background: var(--bg);
-    border-bottom: 0.5px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .logo-mark {
-    width: 32px;
-    height: 32px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .logo-mark span { color: #fff; font-size: 13px; font-weight: 500; }
-  .logo-text { font-size: 14px; font-weight: 500; color: var(--text); }
-  .logo-sub { font-size: 12px; color: var(--text3); margin-left: 4px; }
-  .header-nav { margin-left: auto; display: flex; gap: 4px; }
-  .nav-btn {
-    font-size: 13px;
-    padding: 5px 12px;
-    border-radius: var(--radius);
-    border: none;
-    background: none;
-    color: var(--text2);
-    cursor: pointer;
-    font-family: var(--font);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .nav-btn:hover { background: var(--bg2); color: var(--text); }
-  .nav-btn.primary {
-    background: var(--accent-light);
-    color: var(--accent);
-    font-weight: 500;
-  }
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 1000;
+}
 
-  /* HERO */
-  .hero {
-    background: var(--bg);
-    border-bottom: 0.5px solid var(--border);
-    padding: 3rem 2rem 2.5rem;
-  }
-  .hero-inner { max-width: 1100px; margin: 0 auto; }
-  .eyebrow {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--text3);
-    margin-bottom: 10px;
-  }
-  .hero h1 {
-    font-size: 32px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 8px;
-    line-height: 1.25;
-  }
-  .hero p {
-    font-size: 16px;
-    color: var(--text2);
-    max-width: 600px;
-    margin-bottom: 1.5rem;
-  }
-  .metric-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-top: 1.5rem;
-  }
-  @media (max-width: 700px) { .metric-grid { grid-template-columns: repeat(2, 1fr); } }
-  .metric {
-    background: var(--bg2);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-  }
-  .metric-label { font-size: 12px; color: var(--text3); margin-bottom: 4px; }
-  .metric-value { font-size: 26px; font-weight: 500; color: var(--text); line-height: 1; }
-  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+/* ── HERO ── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem 4rem 4rem;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(232,197,71,0.06) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 50% at 10% 80%, rgba(76,175,130,0.04) 0%, transparent 60%);
+}
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 100%);
+}
+.hero-content { position: relative; max-width: 1200px; }
+.hero-eyebrow {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp .8s var(--ease) .2s forwards;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 800;
+  line-height: .95;
+  letter-spacing: -.03em;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp .9s var(--ease) .35s forwards;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--gold);
+  display: block;
+}
+.hero-desc {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--text2);
+  max-width: 520px;
+  line-height: 1.7;
+  margin-bottom: 3rem;
+  opacity: 0;
+  animation: fadeUp .9s var(--ease) .5s forwards;
+}
+.hero-stats {
+  display: flex;
+  gap: 3rem;
+  opacity: 0;
+  animation: fadeUp .9s var(--ease) .65s forwards;
+  flex-wrap: wrap;
+}
+.hstat { border-left: 1px solid var(--border2); padding-left: 1.5rem; }
+.hstat-n {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+.hstat-n span { font-size: 22px; color: var(--gold); }
+.hstat-l { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.hero-scroll {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 4rem;
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: fadeUp .8s var(--ease) 1s forwards;
+}
+.hero-scroll::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--text3);
+}
 
-  /* MAIN LAYOUT */
-  .main { max-width: 1100px; margin: 0 auto; padding: 2rem; display: grid; grid-template-columns: 220px 1fr; gap: 1.5rem; }
-  @media (max-width: 800px) { .main { grid-template-columns: 1fr; } }
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 500;
+  padding: 1rem 4rem;
+  display: flex;
+  align-items: center;
+  background: rgba(10,10,8,0);
+  backdrop-filter: blur(0px);
+  transition: background .4s, backdrop-filter .4s;
+}
+nav.scrolled {
+  background: rgba(10,10,8,0.88);
+  backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid var(--border);
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-dot {
+  width: 8px; height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+.nav-links { margin-left: auto; display: flex; gap: 4px; }
+.nav-link {
+  font-size: 13px;
+  color: var(--text2);
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+  transition: color .15s, background .15s;
+}
+.nav-link:hover { color: var(--text); background: var(--c3); }
+.nav-link.active { color: var(--gold); }
 
-  /* SIDEBAR */
-  .sidebar { display: flex; flex-direction: column; gap: 6px; }
-  .sidebar-section { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); padding: 6px 10px 4px; }
-  .side-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    border-radius: var(--radius);
-    border: none;
-    background: none;
-    color: var(--text2);
-    cursor: pointer;
-    font-family: var(--font);
-    font-size: 13px;
-    text-align: left;
-    width: 100%;
-    transition: background .12s, color .12s;
-  }
-  .side-btn:hover { background: var(--bg2); color: var(--text); }
-  .side-btn.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
-  .side-btn i { font-size: 16px; }
+/* ── SECTIONS ── */
+section { padding: 5rem 4rem; }
+.section-label {
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+.section-sub { font-size: 16px; color: var(--text2); font-weight: 300; line-height: 1.65; max-width: 540px; }
 
-  /* CONTENT */
-  .content { min-width: 0; }
-  .panel { display: none; }
-  .panel.active { display: block; }
+/* ── HIERARQUIA VISUAL ── */
+#hierarquia { background: var(--c1); }
+.hier-container { margin-top: 3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+@media(max-width:800px){ .hier-container { grid-template-columns: 1fr; } }
 
-  /* CARDS */
-  .section-head {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text2);
-    padding-bottom: 10px;
-    border-bottom: 0.5px solid var(--border);
-    margin-bottom: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .info-card {
-    background: var(--bg);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1rem 1.25rem;
-    margin-bottom: 10px;
-  }
-  .info-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
-  .info-card p { font-size: 13px; color: var(--text2); line-height: 1.65; }
+.hier-pyramid { display: flex; flex-direction: column; gap: 6px; }
+.hier-tier {
+  border-radius: 10px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: all .25s var(--ease);
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+.hier-tier::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .25s;
+  background: rgba(255,255,255,0.04);
+}
+.hier-tier:hover::before, .hier-tier.selected::before { opacity: 1; }
+.hier-tier.selected { border-color: var(--border2); }
+.tier-row { display: flex; align-items: center; gap: 12px; }
+.tier-icon { font-size: 20px; width: 28px; flex-shrink: 0; }
+.tier-info { flex: 1; }
+.tier-name { font-size: 14px; font-weight: 500; line-height: 1.3; }
+.tier-n { font-family: var(--font-display); font-size: 28px; font-weight: 700; line-height: 1; }
+.tier-bar { margin-top: 8px; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.08); overflow: hidden; }
+.tier-fill { height: 100%; border-radius: 2px; transition: width .6s var(--ease); }
 
-  /* HIERARCHY BARS */
-  .h-row { display: flex; align-items: center; gap: 10px; font-size: 13px; margin-bottom: 8px; }
-  .h-label { width: 210px; flex-shrink: 0; color: var(--text2); font-size: 12px; }
-  .h-bar-wrap { flex: 1; background: var(--bg2); border-radius: 4px; height: 22px; overflow: hidden; }
-  .h-bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 500; color: #fff; transition: width .6s ease; }
-  .h-count { width: 50px; text-align: right; color: var(--text3); font-size: 12px; flex-shrink: 0; }
+.tier-t1 { background: rgba(232,197,71,0.08); }
+.tier-t1 .tier-n { color: var(--gold); }
+.tier-t1 .tier-fill { background: var(--gold); }
+.tier-t2 { background: rgba(76,175,130,0.08); }
+.tier-t2 .tier-n { color: var(--green); }
+.tier-t2 .tier-fill { background: var(--green); }
+.tier-t3 { background: rgba(91,155,213,0.08); }
+.tier-t3 .tier-n { color: var(--blue); }
+.tier-t3 .tier-fill { background: var(--blue); }
+.tier-t4 { background: rgba(224,123,58,0.08); }
+.tier-t4 .tier-n { color: var(--orange); }
+.tier-t4 .tier-fill { background: var(--orange); }
+.tier-t5 { background: rgba(139,116,212,0.08); }
+.tier-t5 .tier-n { color: var(--purple); }
+.tier-t5 .tier-fill { background: var(--purple); }
 
-  /* BADGE */
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
-  .b-m-g  { background: #EEEDFE; color: #3C3489; }
-  .b-m-n  { background: #CECBF6; color: #3C3489; }
-  .b-m    { background: #AFA9EC; color: #26215C; }
-  .b-ca   { background: #E1F5EE; color: #085041; }
-  .b-cb   { background: #9FE1CB; color: #085041; }
-  .b-cc   { background: #5DCAA5; color: #04342C; }
-  .b-sa   { background: #E6F1FB; color: #0C447C; }
-  .b-sb   { background: #B5D4F4; color: #042C53; }
-  .b-za   { background: #FAEEDA; color: #633806; }
-  .b-zb   { background: #FAC775; color: #412402; }
-  .b-lo   { background: #F1EFE8; color: #444441; }
+.detail-panel {
+  background: var(--c2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  min-height: 300px;
+  position: sticky;
+  top: 5rem;
+  transition: all .3s var(--ease);
+}
+.detail-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 250px; color: var(--text3); font-size: 14px; gap: 8px; }
+.detail-empty-icon { font-size: 36px; opacity: .3; }
+.detail-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.detail-heading { font-family: var(--font-display); font-size: 28px; font-weight: 700; margin-bottom: .75rem; line-height: 1.2; }
+.detail-text { font-size: 14px; color: var(--text2); line-height: 1.75; margin-bottom: 1.5rem; font-weight: 300; }
+.detail-cities { display: flex; flex-wrap: wrap; gap: 6px; }
+.city-tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--c3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  cursor: default;
+  transition: all .15s;
+}
+.city-tag:hover { border-color: var(--border2); color: var(--text); background: var(--c4); }
 
-  /* TABLE */
-  .filter-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
-  .filter-row input, .filter-row select {
-    font-size: 13px;
-    padding: 6px 10px;
-    height: 34px;
-    border-radius: var(--radius);
-    border: 0.5px solid var(--border2);
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    outline: none;
-  }
-  .filter-row input:focus, .filter-row select:focus { border-color: var(--accent); }
-  .filter-row input { flex: 1; min-width: 180px; }
-  .count-tag { font-size: 12px; color: var(--text3); margin-left: auto; }
-  .table-wrap { border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { background: var(--bg2); padding: 9px 12px; text-align: left; font-weight: 500; font-size: 11px; color: var(--text3); border-bottom: 0.5px solid var(--border); white-space: nowrap; }
-  td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text); vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: var(--bg2); }
+/* ── BUSCA ── */
+#busca { background: var(--c0); }
+.search-bar-wrap {
+  position: relative;
+  margin: 2.5rem 0 1.5rem;
+}
+.search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--text3);
+  pointer-events: none;
+}
+#search-input {
+  width: 100%;
+  background: var(--c2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 18px 20px 18px 52px;
+  font-size: 18px;
+  font-family: var(--font-body);
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+#search-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(232,197,71,0.08);
+}
+#search-input::placeholder { color: var(--text3); }
+.filter-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border2);
+  cursor: pointer;
+  background: none;
+  font-family: var(--font-body);
+  color: var(--text2);
+  transition: all .15s;
+}
+.chip:hover { border-color: var(--gold); color: var(--gold); }
+.chip.active { background: var(--gold); color: var(--c0); border-color: var(--gold); }
+.results-count { font-size: 13px; color: var(--text3); margin-bottom: 1rem; }
+.city-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.city-card {
+  background: var(--c2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: all .2s var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+.city-card::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 3px 0 0 3px;
+  transition: opacity .2s;
+}
+.city-card:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+.city-card-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+.city-card-uf { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+.city-card-nivel { display: flex; align-items: center; gap: 6px; }
+.nivel-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.nivel-text { font-size: 12px; color: var(--text2); }
+.city-card-pop { font-size: 12px; color: var(--text3); margin-top: 6px; }
 
-  /* CHARTS */
-  .chart-wrap { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
-  .chart-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
-  .chart-sub { font-size: 12px; color: var(--text3); margin-bottom: 12px; }
-  .legend-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
-  .leg-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); }
-  .leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--c2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 2.5rem;
+  max-width: 540px;
+  width: 100%;
+  transform: scale(.95) translateY(10px);
+  transition: transform .3s var(--ease);
+  position: relative;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+.modal-close {
+  position: absolute;
+  top: 1.25rem; right: 1.25rem;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--c3);
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+}
+.modal-close:hover { border-color: var(--border2); color: var(--text); }
+.modal-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 1rem; }
+.modal-city { font-family: var(--font-display); font-size: 32px; font-weight: 700; margin-bottom: .25rem; line-height: 1.1; }
+.modal-uf { font-size: 14px; color: var(--text3); margin-bottom: 1.5rem; }
+.modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+.modal-stat { background: var(--c3); border-radius: 10px; padding: 12px 14px; }
+.modal-stat-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; letter-spacing: .04em; text-transform: uppercase; }
+.modal-stat-value { font-size: 18px; font-weight: 500; }
+.modal-desc { font-size: 14px; color: var(--text2); line-height: 1.75; font-weight: 300; }
 
-  /* DOWNLOADS */
-  .dl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media (max-width: 640px) { .dl-grid { grid-template-columns: 1fr; } }
-  .dl-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
-  .dl-card-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-  .dl-card-desc { font-size: 12px; color: var(--text2); margin-bottom: 12px; line-height: 1.55; }
-  .dl-links { display: flex; flex-wrap: wrap; gap: 6px; }
-  .dl-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    padding: 5px 10px;
-    border: 0.5px solid var(--border2);
-    border-radius: var(--radius);
-    cursor: pointer;
-    background: var(--bg2);
-    color: var(--text);
-    text-decoration: none;
-    font-family: var(--font);
-    transition: background .12s;
-  }
-  .dl-btn:hover { background: var(--bg3); }
-  .notice {
-    background: var(--bg2);
-    border-radius: var(--radius);
-    padding: 10px 14px;
-    font-size: 12px;
-    color: var(--text2);
-    margin-top: 1rem;
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-  }
+/* ── GRAFICOS ── */
+#graficos { background: var(--c1); }
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 3rem; }
+@media(max-width:800px){ .chart-grid { grid-template-columns: 1fr; } }
+.chart-card {
+  background: var(--c2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.75rem;
+}
+.chart-card.full { grid-column: 1 / -1; }
+.chart-card-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.chart-card-sub { font-size: 13px; color: var(--text3); margin-bottom: 1.5rem; }
+.chart-area { position: relative; width: 100%; }
 
-  /* FOOTER */
-  footer {
-    background: var(--bg);
-    border-top: 0.5px solid var(--border);
-    padding: 2rem;
-    text-align: center;
-    font-size: 12px;
-    color: var(--text3);
-    margin-top: 3rem;
-  }
-  footer a { color: var(--accent); text-decoration: none; }
+/* ── REDE VISUAL ── */
+#rede { background: var(--c0); }
+.network-wrap {
+  margin-top: 2rem;
+  background: var(--c1);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+#network-canvas { display: block; width: 100%; cursor: grab; }
+#network-canvas:active { cursor: grabbing; }
+.network-legend {
+  position: absolute;
+  bottom: 1.5rem; right: 1.5rem;
+  background: rgba(10,10,8,0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  font-size: 12px;
+}
+.network-legend-title { font-weight: 600; margin-bottom: 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); }
+.leg-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; color: var(--text2); }
+.leg-circle { border-radius: 50%; flex-shrink: 0; }
+.network-tooltip {
+  position: absolute;
+  background: var(--c2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  pointer-events: none;
+  display: none;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ── DOWNLOADS ── */
+#downloads { background: var(--c1); }
+.dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 3rem; }
+@media(max-width:900px){ .dl-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:600px){ .dl-grid { grid-template-columns: 1fr; } }
+.dl-card {
+  background: var(--c2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all .2s var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+.dl-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.dl-card:hover { border-color: var(--border2); transform: translateY(-3px); }
+.dl-card:hover::before { opacity: 1; }
+.dl-icon { font-size: 24px; margin-bottom: 1rem; }
+.dl-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+.dl-desc { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 1.25rem; }
+.dl-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.dl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--c3);
+  color: var(--text2);
+  text-decoration: none;
+  transition: all .15s;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+.dl-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(232,197,71,0.06); }
+.dl-btn-primary { background: rgba(232,197,71,0.1); border-color: rgba(232,197,71,0.3); color: var(--gold); }
+.dl-btn-primary:hover { background: rgba(232,197,71,0.18); }
+
+/* ── TIMELINE ── */
+#historico { background: var(--c0); }
+.timeline { margin-top: 3rem; position: relative; padding-left: 3rem; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 8px; bottom: 8px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--gold) 0%, var(--border) 100%);
+}
+.tl-item {
+  position: relative;
+  margin-bottom: 3rem;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: all .5s var(--ease);
+}
+.tl-item.visible { opacity: 1; transform: translateX(0); }
+.tl-dot {
+  position: absolute;
+  left: -3rem;
+  top: 6px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid var(--c0);
+  box-shadow: 0 0 0 3px rgba(232,197,71,0.2);
+}
+.tl-year {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.tl-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+.tl-desc { font-size: 14px; color: var(--text2); line-height: 1.75; font-weight: 300; max-width: 600px; }
+.tl-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 6px 14px;
+  background: var(--c2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text2);
+}
+.tl-stat strong { color: var(--text); }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--c1);
+  border-top: 1px solid var(--border);
+  padding: 3rem 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-logo { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+.footer-logo span { color: var(--gold); }
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a { font-size: 13px; color: var(--text3); text-decoration: none; transition: color .15s; }
+.footer-links a:hover { color: var(--gold); }
+.footer-copy { font-size: 12px; color: var(--text3); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .7s var(--ease), transform .7s var(--ease);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--c1); }
+::-webkit-scrollbar-thumb { background: var(--c4); border-radius: 3px; }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="header-inner">
-    <div class="logo-mark"><span>RG</span></div>
-    <span class="logo-text">Portal REGIC</span>
-    <span class="logo-sub">IBGE 2018</span>
-    <nav class="header-nav">
-      <a class="nav-btn" href="https://www.ibge.gov.br/geociencias/cartas-e-mapas/redes-geograficas/15798-regioes-de-influencia-das-cidades.html" target="_blank">
-        <i class="ti ti-external-link"></i> IBGE
-      </a>
-      <a class="nav-btn" href="https://www.ibge.gov.br/apps/regic" target="_blank">
-        <i class="ti ti-map-2"></i> Mapa oficial
-      </a>
-      <a class="nav-btn primary" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/" target="_blank">
-        <i class="ti ti-download"></i> FTP IBGE
-      </a>
-    </nav>
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">
+    <div class="nav-dot"></div>
+    REGIC <span style="color:var(--text3);font-weight:400;margin-left:4px">2018</span>
   </div>
-</header>
+  <div class="nav-links">
+    <button class="nav-link" onclick="scrollTo('hierarquia')">Hierarquia</button>
+    <button class="nav-link" onclick="scrollTo('busca')">Buscar</button>
+    <button class="nav-link" onclick="scrollTo('graficos')">Gráficos</button>
+    <button class="nav-link" onclick="scrollTo('rede')">Rede</button>
+    <button class="nav-link" onclick="scrollTo('downloads')">Downloads</button>
+  </div>
+</nav>
 
-<section class="hero">
-  <div class="hero-inner">
-    <p class="eyebrow">IBGE · Geociências · Redes Geográficas</p>
-    <h1>Regiões de Influência das Cidades</h1>
-    <p>Explore a hierarquia urbana brasileira e as redes de influência entre municípios. Dados da REGIC 2018 — quinta edição da pesquisa, resultados definitivos.</p>
-    <div class="metric-grid">
-      <div class="metric">
-        <div class="metric-label">Cidades analisadas</div>
-        <div class="metric-value">5.570</div>
-        <div class="metric-sub">municípios + arranjos populacionais</div>
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">IBGE · Geociências · REGIC 2018</p>
+    <h1>Rede Urbana<em>do Brasil</em></h1>
+    <p class="hero-desc">Explore a hierarquia das cidades brasileiras e as regiões de influência — da metrópole ao centro local.</p>
+    <div class="hero-stats">
+      <div class="hstat">
+        <div class="hstat-n"><span id="cnt1">0</span></div>
+        <div class="hstat-l">Metrópoles</div>
       </div>
-      <div class="metric">
-        <div class="metric-label">Metrópoles</div>
-        <div class="metric-value">15</div>
-        <div class="metric-sub">3 novas em relação a 2007</div>
+      <div class="hstat">
+        <div class="hstat-n"><span id="cnt2">0</span></div>
+        <div class="hstat-l">Capitais Regionais</div>
       </div>
-      <div class="metric">
-        <div class="metric-label">Capitais Regionais</div>
-        <div class="metric-value">122</div>
-        <div class="metric-sub">tipos A, B e C</div>
+      <div class="hstat">
+        <div class="hstat-n"><span id="cnt3">0</span></div>
+        <div class="hstat-l">Centros Sub-Regionais</div>
       </div>
-      <div class="metric">
-        <div class="metric-label">Centros Locais</div>
-        <div class="metric-value">4.479</div>
-        <div class="metric-sub">maioria dos municípios</div>
+      <div class="hstat">
+        <div class="hstat-n"><span id="cnt4">0</span></div>
+        <div class="hstat-l">Centros Locais</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">Rolar para explorar</div>
+</section>
+
+<!-- HIERARQUIA -->
+<section id="hierarquia">
+  <div class="reveal">
+    <p class="section-label">Nível 01 — Hierarquia</p>
+    <h2 class="section-title">Clique em um nível<br>para explorar</h2>
+  </div>
+  <div class="hier-container">
+    <div class="hier-pyramid" id="pyramid"></div>
+    <div class="detail-panel" id="detail-panel">
+      <div class="detail-empty">
+        <div class="detail-empty-icon">◎</div>
+        <span>Selecione um nível hierárquico</span>
       </div>
     </div>
   </div>
 </section>
 
-<div class="main">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-section">Explorar</div>
-    <button class="side-btn active" onclick="switchPanel('hierarquia')">
-      <i class="ti ti-building-skyscraper"></i> Hierarquia urbana
-    </button>
-    <button class="side-btn" onclick="switchPanel('cidades')">
-      <i class="ti ti-list-details"></i> Tabela de cidades
-    </button>
-    <button class="side-btn" onclick="switchPanel('graficos')">
-      <i class="ti ti-chart-bar"></i> Gráficos
-    </button>
-    <button class="side-btn" onclick="switchPanel('downloads')">
-      <i class="ti ti-download"></i> Downloads
-    </button>
-    <div class="sidebar-section" style="margin-top:1rem">Sobre</div>
-    <button class="side-btn" onclick="switchPanel('sobre')">
-      <i class="ti ti-info-circle"></i> O que é a REGIC
-    </button>
-    <button class="side-btn" onclick="switchPanel('metodologia')">
-      <i class="ti ti-book"></i> Metodologia
-    </button>
-    <div class="sidebar-section" style="margin-top:1rem">Links</div>
-    <a class="side-btn" href="https://www.ibge.gov.br/apps/regic" target="_blank">
-      <i class="ti ti-map-pin"></i> Mapa interativo
-    </a>
-    <a class="side-btn" href="https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&id=2101728" target="_blank">
-      <i class="ti ti-book-2"></i> Publicação completa
-    </a>
-  </aside>
+<!-- BUSCA -->
+<section id="busca">
+  <div class="reveal">
+    <p class="section-label">Nível 02 — Busca</p>
+    <h2 class="section-title">Encontre qualquer cidade</h2>
+    <p class="section-sub">Filtre por nome, nível hierárquico ou estado. Clique em uma cidade para ver detalhes.</p>
+  </div>
+  <div class="search-bar-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search-input" placeholder="Buscar cidade... ex: Manaus, Curitiba, Sobral" oninput="filterCities()">
+  </div>
+  <div class="filter-chips" id="chips"></div>
+  <p class="results-count" id="results-count"></p>
+  <div class="city-grid" id="city-grid"></div>
+</section>
 
-  <!-- CONTENT -->
-  <main class="content">
-
-    <!-- HIERARQUIA -->
-    <div id="panel-hierarquia" class="panel active">
-      <div class="section-head"><i class="ti ti-building-skyscraper"></i> Níveis hierárquicos — rede urbana brasileira 2018</div>
-
-      <div id="hbars" style="margin-bottom:1.5rem"></div>
-
-      <div class="section-head" style="margin-top:1.5rem"><i class="ti ti-info-circle"></i> O que significa cada nível</div>
-
-      <div class="info-card">
-        <h3>🏙 Metrópoles — 15 cidades</h3>
-        <p>Principais centros urbanos do país, dos quais todas as cidades recebem influência direta ou indireta. São as três <strong>Grandes Metrópoles Nacionais</strong> (São Paulo, Rio de Janeiro, Brasília), três <strong>Metrópoles Nacionais</strong> (Manaus, Belém, Fortaleza) e nove <strong>Metrópoles</strong> (Recife, Salvador, Belo Horizonte, Curitiba, Goiânia, Porto Alegre, Campinas, Florianópolis e Vitória — sendo as três últimas novidades de 2018).</p>
-      </div>
-      <div class="info-card">
-        <h3>🏛 Capitais Regionais — 122 cidades</h3>
-        <p>Alta concentração de atividades de gestão, com alcance regional expressivo. Dividem-se em Capital Regional A (11), B (25) e C (86). Geralmente são capitais de estados ou cidades médias com forte polarização regional.</p>
-      </div>
-      <div class="info-card">
-        <h3>🏢 Centros Sub-Regionais — 355 cidades</h3>
-        <p>Atividades de gestão inferiores às Capitais Regionais, mas relevantes para o entorno imediato. Dividem-se em Sub-Regional A (75) e Sub-Regional B (280). Atendem populações de municípios vizinhos em serviços de saúde, educação e comércio especializado.</p>
-      </div>
-      <div class="info-card">
-        <h3>🏪 Centros de Zona — 605 cidades</h3>
-        <p>Polarizam cidades próximas por razões de proximidade geográfica. Atendem sua população e do entorno em serviços e comércio básico. Dividem-se em Zona A (192) e Zona B (413).</p>
-      </div>
-      <div class="info-card">
-        <h3>🏘 Centros Locais — 4.479 cidades</h3>
-        <p>Exercem influência restrita aos próprios limites territoriais. Constituem a grande maioria dos municípios brasileiros e dependem de centros de hierarquia superior para serviços especializados. Não são destino principal de nenhuma outra cidade.</p>
-      </div>
+<!-- GRÁFICOS -->
+<section id="graficos">
+  <div class="reveal">
+    <p class="section-label">Nível 03 — Análise</p>
+    <h2 class="section-title">Dados em perspectiva</h2>
+  </div>
+  <div class="chart-grid">
+    <div class="chart-card full reveal">
+      <div class="chart-card-title">Distribuição por nível hierárquico</div>
+      <div class="chart-card-sub">Número de municípios em cada nível da rede urbana — REGIC 2018</div>
+      <div class="chart-area" style="height:280px"><canvas id="chart-dist" role="img" aria-label="Distribuição REGIC: Metrópoles 15, Capitais Regionais 122, Centros Sub-Regionais 355, Centros de Zona 605, Centros Locais 4479">Metrópoles: 15 | Capitais Regionais: 122 | Centros Sub-Regionais: 355 | Centros de Zona: 605 | Centros Locais: 4479.</canvas></div>
     </div>
-
-    <!-- CIDADES -->
-    <div id="panel-cidades" class="panel">
-      <div class="section-head"><i class="ti ti-list-details"></i> Principais cidades por nível hierárquico</div>
-      <div class="filter-row">
-        <input type="text" id="search" placeholder="Buscar cidade..." oninput="filterTable()">
-        <select id="f-nivel" onchange="filterTable()">
-          <option value="">Todos os níveis</option>
-          <option value="Grande Metrópole Nacional">Grande Metrópole Nacional</option>
-          <option value="Metrópole Nacional">Metrópole Nacional</option>
-          <option value="Metrópole">Metrópole</option>
-          <option value="Capital Regional A">Capital Regional A</option>
-          <option value="Capital Regional B">Capital Regional B</option>
-          <option value="Capital Regional C">Capital Regional C</option>
-          <option value="Centro Sub-Regional A">Centro Sub-Regional A</option>
-          <option value="Centro Sub-Regional B">Centro Sub-Regional B</option>
-          <option value="Centro de Zona A">Centro de Zona A</option>
-          <option value="Centro de Zona B">Centro de Zona B</option>
-          <option value="Centro Local">Centro Local</option>
-        </select>
-        <select id="f-uf" onchange="filterTable()">
-          <option value="">Todos os estados</option>
-        </select>
-        <span class="count-tag" id="count-tag"></span>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Cidade</th>
-              <th>UF</th>
-              <th>Nível hierárquico</th>
-              <th>Região de influência</th>
-              <th style="text-align:right">Pop. aprox.</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-      <p style="font-size:11px;color:var(--text3);margin-top:8px">* Amostra das principais cidades de cada nível. Para a base completa com todos os municípios, baixe os arquivos na aba Downloads.</p>
+    <div class="chart-card reveal">
+      <div class="chart-card-title">Metrópoles por região</div>
+      <div class="chart-card-sub">Distribuição regional das 15 metrópoles</div>
+      <div class="chart-area" style="height:220px"><canvas id="chart-regioes" role="img" aria-label="Metrópoles por região: Sudeste 7, Sul 3, Nordeste 3, Norte 2, Centro-Oeste 1">Sudeste: 7 | Sul: 3 | Nordeste: 3 | Norte: 2 | Centro-Oeste: 1.</canvas></div>
     </div>
-
-    <!-- GRÁFICOS -->
-    <div id="panel-graficos" class="panel">
-      <div class="section-head"><i class="ti ti-chart-bar"></i> Visualizações de dados</div>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Distribuição por nível hierárquico</div>
-        <div class="chart-sub">Número de cidades em cada nível da rede urbana brasileira — REGIC 2018</div>
-        <div class="legend-row" id="leg1"></div>
-        <div style="position:relative;width:100%;height:300px">
-          <canvas id="chart1" role="img" aria-label="Gráfico de barras: Metrópoles 15, Capitais Regionais 122, Centros Sub-Regionais 355, Centros de Zona 605, Centros Locais 4479">Metrópoles: 15 | Capitais Regionais: 122 | Centros Sub-Regionais: 355 | Centros de Zona: 605 | Centros Locais: 4.479.</canvas>
-        </div>
-      </div>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Metrópoles por grande região</div>
-        <div class="chart-sub">Concentração das 15 metrópoles nas 5 regiões brasileiras</div>
-        <div class="legend-row" id="leg2"></div>
-        <div style="position:relative;width:100%;height:220px">
-          <canvas id="chart2" role="img" aria-label="Gráfico de barras: Sudeste 7, Sul 3, Nordeste 3, Norte 2, Centro-Oeste 1">Sudeste: 7 | Sul: 3 | Nordeste: 3 | Norte: 2 | Centro-Oeste: 1.</canvas>
-        </div>
-      </div>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Evolução histórica do número de metrópoles</div>
-        <div class="chart-sub">Crescimento da rede metropolitana brasileira nas edições da REGIC (1966–2018)</div>
-        <div class="legend-row" id="leg3"></div>
-        <div style="position:relative;width:100%;height:220px">
-          <canvas id="chart3" role="img" aria-label="Gráfico de linha: 1966 com 2, 1978 com 8, 1993 com 9, 2007 com 12, 2018 com 15 metrópoles">1966: 2 | 1978: 8 | 1993: 9 | 2007: 12 | 2018: 15.</canvas>
-        </div>
-      </div>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Capitais regionais por estado (top 10 estados)</div>
-        <div class="chart-sub">Estados com maior número de capitais regionais</div>
-        <div class="legend-row" id="leg4"></div>
-        <div style="position:relative;width:100%;height:280px">
-          <canvas id="chart4" role="img" aria-label="Gráfico de barras horizontais: SP 18, MG 14, PR 10, RS 9, BA 8, SC 7, GO 7, CE 6, RJ 5, PE 5">SP: 18 | MG: 14 | PR: 10 | RS: 9 | BA: 8 | SC: 7 | GO: 7 | CE: 6 | RJ: 5 | PE: 5.</canvas>
-        </div>
-      </div>
+    <div class="chart-card reveal">
+      <div class="chart-card-title">Evolução histórica</div>
+      <div class="chart-card-sub">Crescimento das metrópoles 1966–2018</div>
+      <div class="chart-area" style="height:220px"><canvas id="chart-evolucao" role="img" aria-label="Metrópoles: 1966→2, 1978→8, 1993→9, 2007→12, 2018→15">1966: 2 | 1978: 8 | 1993: 9 | 2007: 12 | 2018: 15.</canvas></div>
     </div>
-
-    <!-- DOWNLOADS -->
-    <div id="panel-downloads" class="panel">
-      <div class="section-head"><i class="ti ti-download"></i> Bases de dados oficiais — REGIC 2018</div>
-      <div class="dl-grid">
-        <div class="dl-card">
-          <div class="dl-card-title"><i class="ti ti-table" style="font-size:15px;color:var(--accent)"></i> Cidades</div>
-          <div class="dl-card-desc">Base principal com hierarquia e dados de todas as cidades. Atualizado em 09/10/2020.</div>
-          <div class="dl-links">
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Cidades_v2.xlsx" target="_blank"><i class="ti ti-file-spreadsheet"></i> XLSX</a>
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Cidades_v2.ods" target="_blank"><i class="ti ti-file"></i> ODS</a>
-          </div>
-        </div>
-
-        <div class="dl-card">
-          <div class="dl-card-title"><i class="ti ti-arrows-exchange" style="font-size:15px;color:var(--accent)"></i> Ligações entre cidades</div>
-          <div class="dl-card-desc">Vínculos hierárquicos entre centros urbanos da rede urbana brasileira.</div>
-          <div class="dl-links">
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Ligacoes_entre_Cidades.xlsx" target="_blank"><i class="ti ti-file-spreadsheet"></i> XLSX</a>
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Ligacoes_entre_Cidades.ods" target="_blank"><i class="ti ti-file"></i> ODS</a>
-          </div>
-        </div>
-
-        <div class="dl-card">
-          <div class="dl-card-title"><i class="ti ti-map-pin" style="font-size:15px;color:var(--accent)"></i> Municípios — hierarquia e região</div>
-          <div class="dl-card-desc">Hierarquia e região de influência por município. Incluído em 17/02/2023.</div>
-          <div class="dl-links">
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Municipios_Hierarquia_e_regiao.xlsx" target="_blank"><i class="ti ti-file-spreadsheet"></i> XLSX</a>
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Municipios_Hierarquia_e_regiao.ods" target="_blank"><i class="ti ti-file"></i> ODS</a>
-          </div>
-        </div>
-
-        <div class="dl-card">
-          <div class="dl-card-title"><i class="ti ti-matrix" style="font-size:15px;color:var(--accent)"></i> Matriz de ligações</div>
-          <div class="dl-card-desc">Matriz completa de regiões de influência entre todas as cidades. Incluído em 02/07/2020.</div>
-          <div class="dl-links">
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Matriz_de_Ligacoes.xlsx" target="_blank"><i class="ti ti-file-spreadsheet"></i> XLSX</a>
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Matriz_de_Ligacoes.ods" target="_blank"><i class="ti ti-file"></i> ODS</a>
-          </div>
-        </div>
-
-        <div class="dl-card">
-          <div class="dl-card-title"><i class="ti ti-users" style="font-size:15px;color:var(--accent)"></i> Arranjos populacionais</div>
-          <div class="dl-card-desc">Municípios integrantes de arranjos populacionais. Atualizado em 09/10/2020.</div>
-          <div class="dl-links">
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Arranjos_Populacionais_v2.xlsx" target="_blank"><i class="ti ti-file-spreadsheet"></i> XLSX</a>
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Arranjos_Populacionais_v2.ods" target="_blank"><i class="ti ti-file"></i> ODS</a>
-          </div>
-        </div>
-
-        <div class="dl-card">
-          <div class="dl-card-title"><i class="ti ti-map-2" style="font-size:15px;color:var(--accent)"></i> Base vetorial (SIG)</div>
-          <div class="dl-card-desc">Arquivos geoespaciais (shapefile) para uso em SIG — regiões de influência.</div>
-          <div class="dl-links">
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_vetorial/REGIC2018_Bases_vetoriais.zip" target="_blank"><i class="ti ti-zip"></i> ZIP (SHP)</a>
-          </div>
-        </div>
-
-        <div class="dl-card">
-          <div class="dl-card-title"><i class="ti ti-route" style="font-size:15px;color:var(--accent)"></i> Distâncias rodoviárias/aéreas</div>
-          <div class="dl-card-desc">Referência de distâncias entre municípios (rodoviário, hidroviário e aéreo). Incluído em 06/10/2023.</div>
-          <div class="dl-links">
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Rotas_Brasil.xlsx" target="_blank"><i class="ti ti-file-spreadsheet"></i> XLSX</a>
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Rotas_Brasil.ods" target="_blank"><i class="ti ti-file"></i> ODS</a>
-          </div>
-        </div>
-
-        <div class="dl-card">
-          <div class="dl-card-title"><i class="ti ti-history" style="font-size:15px;color:var(--accent)"></i> Hierarquias históricas 1966–2018</div>
-          <div class="dl-card-desc">Compatibilização hierárquica entre todas as edições da REGIC. Incluído em 17/12/2024.</div>
-          <div class="dl-links">
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/Tabela_de_hierarquias.xlsx" target="_blank"><i class="ti ti-file-spreadsheet"></i> XLSX</a>
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/Tabela_de_hierarquias.ods" target="_blank"><i class="ti ti-file"></i> ODS</a>
-          </div>
-        </div>
-
-        <div class="dl-card">
-          <div class="dl-card-title"><i class="ti ti-git-branch" style="font-size:15px;color:var(--accent)"></i> Ligações das redes 1966–2018</div>
-          <div class="dl-card-desc">Série histórica completa de ligações entre cidades nas edições da REGIC. Incluído em 17/12/2024.</div>
-          <div class="dl-links">
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/Tabela_de_ligacoes.xlsx" target="_blank"><i class="ti ti-file-spreadsheet"></i> XLSX</a>
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/Tabela_de_ligacoes.ods" target="_blank"><i class="ti ti-file"></i> ODS</a>
-          </div>
-        </div>
-
-        <div class="dl-card">
-          <div class="dl-card-title"><i class="ti ti-tractor" style="font-size:15px;color:var(--accent)"></i> Fluxos agropecuários</div>
-          <div class="dl-card-desc">Fluxos de produção agropecuária entre municípios. Incluído em 02/07/2020.</div>
-          <div class="dl-links">
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Fluxos_Agropecuarios_xlsx.zip" target="_blank"><i class="ti ti-zip"></i> ZIP (XLSX)</a>
-            <a class="dl-btn" href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Fluxos_Agropecuarios_ods.zip" target="_blank"><i class="ti ti-zip"></i> ZIP (ODS)</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="notice">
-        <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0;margin-top:1px"></i>
-        <span>Todos os arquivos são de domínio público do IBGE. Para acesso ao repositório completo, acesse o <a href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/" target="_blank">FTP do IBGE</a>. Para o mapa interativo oficial, acesse <a href="https://www.ibge.gov.br/apps/regic" target="_blank">ibge.gov.br/apps/regic</a>.</span>
-      </div>
+    <div class="chart-card reveal">
+      <div class="chart-card-title">Capitais regionais por estado</div>
+      <div class="chart-card-sub">Top 10 estados com mais capitais regionais</div>
+      <div class="chart-area" style="height:220px"><canvas id="chart-estados" role="img" aria-label="SP:18, MG:14, PR:10, RS:9, BA:8, SC:7, GO:7, CE:6, RJ:5, PE:5">SP: 18 | MG: 14 | PR: 10 | RS: 9 | BA: 8.</canvas></div>
     </div>
+  </div>
+</section>
 
-    <!-- SOBRE -->
-    <div id="panel-sobre" class="panel">
-      <div class="section-head"><i class="ti ti-info-circle"></i> O que é a REGIC</div>
-      <div class="info-card">
-        <h3>Sobre a pesquisa</h3>
-        <p>A pesquisa <strong>Regiões de Influência das Cidades (REGIC)</strong> define a hierarquia dos centros urbanos brasileiros e delimita as regiões de influência a eles associadas. É nessa pesquisa que se identificam as metrópoles, capitais regionais e outros centros urbanos, bem como o alcance espacial da influência de cada um.</p>
-      </div>
-      <div class="info-card">
-        <h3>Para que serve</h3>
-        <p>Conhecer os relacionamentos entre cidades com base na análise de fluxos de bens, serviços e gestão é um instrumento importante para escolhas locacionais — decidir onde instalar uma universidade, um hospital, um polo industrial ou uma filial de empresa, levando em conta as relações espaciais entre centros urbanos.</p>
-      </div>
-      <div class="info-card">
-        <h3>Edições da REGIC</h3>
-        <p>A pesquisa é realizada a cada 10 anos. A edição 2018 é a quinta: as anteriores foram em 1972, 1987, 1993 e 2007. A periodicidade permite comparar a evolução da rede urbana brasileira ao longo de mais de cinco décadas.</p>
-      </div>
-      <div class="info-card">
-        <h3>O que é "Cidade" na REGIC</h3>
-        <p>A REGIC utiliza como unidade de análise os <em>Arranjos Populacionais</em> (conjuntos de municípios com integração significativa por contiguidade urbana ou pendularidade) e os municípios isolados. Isso permite que uma "cidade" como São Paulo abranja vários municípios da Grande SP como uma única unidade urbana na rede.</p>
-      </div>
+<!-- REDE -->
+<section id="rede">
+  <div class="reveal">
+    <p class="section-label">Nível 04 — Rede</p>
+    <h2 class="section-title">Visualização da rede</h2>
+    <p class="section-sub">Relações de influência entre os principais centros urbanos brasileiros. Passe o mouse sobre os nós para explorar.</p>
+  </div>
+  <div class="network-wrap reveal" style="margin-top:2rem">
+    <canvas id="network-canvas" height="520" role="img" aria-label="Visualização em rede dos centros urbanos brasileiros e suas relações de influência"></canvas>
+    <div class="network-legend">
+      <div class="network-legend-title">Legenda</div>
+      <div class="leg-row"><div class="leg-circle" style="width:14px;height:14px;background:#E8C547"></div> Grande Metrópole</div>
+      <div class="leg-row"><div class="leg-circle" style="width:11px;height:11px;background:#4CAF82"></div> Metrópole</div>
+      <div class="leg-row"><div class="leg-circle" style="width:9px;height:9px;background:#5B9BD5"></div> Capital Regional</div>
+      <div class="leg-row"><div class="leg-circle" style="width:7px;height:7px;background:#888780"></div> Sub-Regional / Zona</div>
     </div>
+    <div class="network-tooltip" id="net-tooltip"></div>
+  </div>
+</section>
 
-    <!-- METODOLOGIA -->
-    <div id="panel-metodologia" class="panel">
-      <div class="section-head"><i class="ti ti-book"></i> Metodologia</div>
-      <div class="info-card">
-        <h3>Hierarquia urbana</h3>
-        <p>A hierarquia indica o nível de articulação que a cidade tem com outros centros por meio de atividades de gestão pública e empresarial, e o nível de atração para suprir bens e serviços a populações de outras cidades. São cinco níveis: Metrópoles, Capitais Regionais, Centros Sub-Regionais, Centros de Zona e Centros Locais.</p>
-      </div>
-      <div class="info-card">
-        <h3>Região de influência</h3>
-        <p>Operacionalizada por meio de vínculos entre centros urbanos de hierarquia menor direcionando-se a outros de hierarquia superior. A região possui feição <em>reticular</em> — em formato de rede — não necessariamente contígua. Pode apresentar sobreposições e duplas subordinações de cidades.</p>
-      </div>
-      <div class="info-card">
-        <h3>Coleta de dados</h3>
-        <p>A REGIC 2018 combinou: (1) questionário de pesquisa primária aplicado nas cidades; (2) registros administrativos de órgãos públicos; (3) outras pesquisas do IBGE relevantes para a temática urbana. Os dados foram coletados na escala municipal e depois agregados para os Arranjos Populacionais.</p>
-      </div>
-      <div class="info-card">
-        <h3>Documentação completa</h3>
-        <p>A nota metodológica completa e a publicação principal estão disponíveis na Biblioteca do IBGE. Acesse: <a href="https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&id=2101729" target="_blank" style="color:var(--accent)">Nota metodológica REGIC 2018</a> e <a href="https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&id=2101728" target="_blank" style="color:var(--accent)">Publicação principal</a>.</p>
-      </div>
-    </div>
+<!-- HISTÓRICO -->
+<section id="historico">
+  <div class="reveal">
+    <p class="section-label">Nível 05 — História</p>
+    <h2 class="section-title">Cinco décadas de<br>rede urbana</h2>
+  </div>
+  <div class="timeline" id="timeline"></div>
+</section>
 
-  </main>
-</div>
+<!-- DOWNLOADS -->
+<section id="downloads">
+  <div class="reveal">
+    <p class="section-label">Nível 06 — Dados</p>
+    <h2 class="section-title">Baixe os dados oficiais</h2>
+    <p class="section-sub">Todos os arquivos são de domínio público do IBGE. Resultados definitivos, publicados com atualizações até 2024.</p>
+  </div>
+  <div class="dl-grid" id="dl-grid"></div>
+</section>
 
+<!-- FOOTER -->
 <footer>
-  <p>Dados: <a href="https://www.ibge.gov.br/geociencias/cartas-e-mapas/redes-geograficas/15798-regioes-de-influencia-das-cidades.html" target="_blank">IBGE — REGIC 2018</a> · Domínio público · Portal desenvolvido para facilitar o acesso e exploração dos dados.</p>
-  <p style="margin-top:6px">Este portal não é oficial do IBGE. Para dados completos e atualizados, acesse sempre <a href="https://www.ibge.gov.br" target="_blank">ibge.gov.br</a>.</p>
+  <div class="footer-logo">REGIC <span>·</span> 2018</div>
+  <div class="footer-links">
+    <a href="https://www.ibge.gov.br/geociencias/cartas-e-mapas/redes-geograficas/15798-regioes-de-influencia-das-cidades.html" target="_blank">IBGE Oficial</a>
+    <a href="https://www.ibge.gov.br/apps/regic" target="_blank">Mapa Interativo</a>
+    <a href="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/" target="_blank">FTP IBGE</a>
+  </div>
+  <div class="footer-copy">Dados: IBGE REGIC 2018 · Domínio público · Portal não oficial</div>
 </footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-// NAVIGATION
-function switchPanel(name) {
-  document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  const btns = document.querySelectorAll('.side-btn');
-  const map = ['hierarquia','cidades','graficos','downloads','sobre','metodologia'];
-  btns.forEach((b,i) => { if (map[i] === name) b.classList.add('active'); });
-  if (name === 'graficos') initCharts();
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const tiers = [
+  { id:'metro-grande', label:'Grande Metrópole Nacional', short:'Grande Metrópole', n:3, cls:'tier-t1', color:'#E8C547',
+    desc:'Os três principais centros urbanos do país — São Paulo, Rio de Janeiro e Brasília — dos quais toda a rede urbana brasileira recebe influência direta ou indireta. São Paulo é o maior centro financeiro, cultural e de gestão da América Latina.',
+    cities:['São Paulo – SP','Rio de Janeiro – RJ','Brasília – DF'] },
+  { id:'metro-nac', label:'Metrópole Nacional', short:'Metrópole Nacional', n:3, cls:'tier-t1', color:'#E8C547',
+    desc:'Centros com alcance nacional e presença de sedes de empresas com atuação em todo o Brasil. Articulam regiões extensas do território nacional e concentram fluxos de capital, pessoas e serviços especializados.',
+    cities:['Fortaleza – CE','Manaus – AM','Belém – PA'] },
+  { id:'metro', label:'Metrópole', short:'Metrópole', n:9, cls:'tier-t2', color:'#4CAF82',
+    desc:'Centros de grande porte com expressiva concentração de atividades de gestão pública e privada, serviços especializados e fluxos intensos com outras cidades. Três delas são novidades em relação à REGIC 2007: Florianópolis, Campinas e Vitória.',
+    cities:['Recife – PE','Salvador – BA','Belo Horizonte – MG','Curitiba – PR','Goiânia – GO','Porto Alegre – RS','Campinas – SP','Florianópolis – SC','Vitória – ES'] },
+  { id:'cap-a', label:'Capital Regional A', short:'Cap. Regional A', n:11, cls:'tier-t2', color:'#4CAF82',
+    desc:'Alta concentração de atividades de gestão com alcance regional de grande porte. São geralmente capitais estaduais com forte influência sobre vastas regiões do interior.',
+    cities:['Maceió – AL','Natal – RN','João Pessoa – PB','Teresina – PI','São Luís – MA','Porto Velho – RO','Cuiabá – MT','Campo Grande – MS','Aracaju – SE','Macapá – AP',' + 1 outra'] },
+  { id:'cap-b', label:'Capital Regional B', short:'Cap. Regional B', n:25, cls:'tier-t2', color:'#4CAF82',
+    desc:'Centros com influência regional relevante, geralmente capitais de estados menores ou cidades de porte médio com forte polarização em suas regiões.',
+    cities:['Ribeirão Preto – SP','Santos – SP','Londrina – PR','Maringá – PR','Caxias do Sul – RS','Boa Vista – RR','Rio Branco – AC','Palmas – TO','+ 17 outras'] },
+  { id:'cap-c', label:'Capital Regional C', short:'Cap. Regional C', n:86, cls:'tier-t3', color:'#5B9BD5',
+    desc:'Centros com expressiva concentração de serviços e comércio especializados, com influência sobre regiões de médio porte. São 86 cidades distribuídas por todo o território nacional.',
+    cities:['Joinville – SC','Blumenau – SC','Juiz de Fora – MG','Feira de Santana – BA','Pelotas – RS','Chapecó – SC','Bauru – SP','São José do Rio Preto – SP','Montes Claros – MG','+ 77 outras'] },
+  { id:'sub-a', label:'Centro Sub-Regional A', short:'Sub-Regional A', n:75, cls:'tier-t3', color:'#5B9BD5',
+    desc:'Centros com atividades de gestão e serviços especializados de menor porte que as capitais regionais. Polarizam conjuntos de municípios do entorno em serviços de saúde, educação e comércio.',
+    cities:['Sobral – CE','Juazeiro do Norte – CE','Petrolina – PE','Imperatriz – MA','Foz do Iguaçu – PR','Santa Maria – RS','Passo Fundo – RS','São Carlos – SP','Cascavel – PR','Santarém – PA','+ 65 outras'] },
+  { id:'sub-b', label:'Centro Sub-Regional B', short:'Sub-Regional B', n:280, cls:'tier-t4', color:'#E07B3A',
+    desc:'Centros com menor alcance que os Sub-Regionais A, mas ainda com expressiva influência sobre municípios vizinhos em serviços especializados, saúde e comércio de médio porte.',
+    cities:['Patos – PB','Itabuna – BA','+ 278 outras cidades distribuídas por todo o Brasil'] },
+  { id:'zona-a', label:'Centro de Zona A', short:'Zona A', n:192, cls:'tier-t4', color:'#E07B3A',
+    desc:'Polarizam conjuntos de municípios próximos em razão da proximidade geográfica e da concentração relativa de serviços básicos e comércio varejista.',
+    cities:['Divinópolis – MG','Patos de Minas – MG','Sinop – MT','+ 189 outras'] },
+  { id:'zona-b', label:'Centro de Zona B', short:'Zona B', n:413, cls:'tier-t4', color:'#E07B3A',
+    desc:'Centros com polarização regional de menor alcance, mas com presença de serviços e comércio suficientes para servir aos municípios do entorno imediato.',
+    cities:['413 cidades distribuídas por todo o Brasil'] },
+  { id:'local', label:'Centro Local', short:'Local', n:4479, cls:'tier-t5', color:'#8B74D4',
+    desc:'A grande maioria dos municípios brasileiros — 80% do total. Exercem influência restrita ao próprio território e dependem de centros de hierarquia superior para acesso a serviços especializados como hospitais de maior complexidade, universidades e comércio especializado.',
+    cities:['4.479 municípios — não são destino principal de nenhuma outra cidade'] },
+];
+
+const cidades = [
+  {nome:'São Paulo',uf:'SP',nivel:'Grande Metrópole',cor:'#E8C547',regiao:'São Paulo',pop:22000000,desc:'Maior metrópole da América do Sul. Centro financeiro, cultural e de gestão do Brasil.'},
+  {nome:'Rio de Janeiro',uf:'RJ',nivel:'Grande Metrópole',cor:'#E8C547',regiao:'Rio de Janeiro',pop:13000000,desc:'Segunda maior metrópole do país. Capital cultural e turística do Brasil.'},
+  {nome:'Brasília',uf:'DF',nivel:'Grande Metrópole',cor:'#E8C547',regiao:'Brasília',pop:3100000,desc:'Capital federal e terceira Grande Metrópole Nacional. Centro de gestão pública do país.'},
+  {nome:'Fortaleza',uf:'CE',nivel:'Metrópole Nacional',cor:'#E8C547',regiao:'Fortaleza',pop:3900000,desc:'Principal metrópole do Nordeste setentrional. Forte polo industrial e de serviços.'},
+  {nome:'Manaus',uf:'AM',nivel:'Metrópole Nacional',cor:'#E8C547',regiao:'Manaus',pop:2200000,desc:'Principal metrópole da Amazônia. Sede da Zona Franca e polo industrial.'},
+  {nome:'Belém',uf:'PA',nivel:'Metrópole Nacional',cor:'#E8C547',regiao:'Belém',pop:2500000,desc:'Principal metrópole do Pará. Portal de entrada da Amazônia Oriental.'},
+  {nome:'Belo Horizonte',uf:'MG',nivel:'Metrópole',cor:'#4CAF82',regiao:'Belo Horizonte',pop:6000000,desc:'Terceira maior região metropolitana do Brasil. Forte polo minerário, industrial e de serviços.'},
+  {nome:'Porto Alegre',uf:'RS',nivel:'Metrópole',cor:'#4CAF82',regiao:'Porto Alegre',pop:4300000,desc:'Principal metrópole do Sul. Centro financeiro e polo gaúcho.'},
+  {nome:'Recife',uf:'PE',nivel:'Metrópole',cor:'#4CAF82',regiao:'Recife',pop:4000000,desc:'Principal metrópole do Nordeste. Forte polo tecnológico e porto estratégico.'},
+  {nome:'Salvador',uf:'BA',nivel:'Metrópole',cor:'#4CAF82',regiao:'Salvador',pop:3900000,desc:'Primeira capital do Brasil. Principal metrópole do Nordeste meridional.'},
+  {nome:'Curitiba',uf:'PR',nivel:'Metrópole',cor:'#4CAF82',regiao:'Curitiba',pop:3700000,desc:'Capital do Paraná. Conhecida pelo planejamento urbano e polo automotivo.'},
+  {nome:'Campinas',uf:'SP',nivel:'Metrópole',cor:'#4CAF82',regiao:'São Paulo',pop:3200000,desc:'Nova metrópole em 2018. Grande polo tecnológico, universitário e agroindustrial.'},
+  {nome:'Goiânia',uf:'GO',nivel:'Metrópole',cor:'#4CAF82',regiao:'Goiânia',pop:2600000,desc:'Principal metrópole do Centro-Oeste (exceto Brasília). Polo do agronegócio.'},
+  {nome:'Florianópolis',uf:'SC',nivel:'Metrópole',cor:'#4CAF82',regiao:'Florianópolis',pop:1100000,desc:'Nova metrópole em 2018. Capital catarinense com forte polo tecnológico e turístico.'},
+  {nome:'Vitória',uf:'ES',nivel:'Metrópole',cor:'#4CAF82',regiao:'Vitória',pop:2100000,desc:'Nova metrópole em 2018. Principal porto de minérios e polo siderúrgico.'},
+  {nome:'Maceió',uf:'AL',nivel:'Capital Regional A',cor:'#5B9BD5',regiao:'Recife',pop:1000000,desc:'Capital alagoana. Polo turístico e de serviços do litoral nordestino.'},
+  {nome:'Natal',uf:'RN',nivel:'Capital Regional A',cor:'#5B9BD5',regiao:'Fortaleza',pop:900000,desc:'Capital potiguar. Forte polo turístico e aeronáutico.'},
+  {nome:'João Pessoa',uf:'PB',nivel:'Capital Regional A',cor:'#5B9BD5',regiao:'Recife',pop:800000,desc:'Capital paraibana. Cidade mais oriental das Américas.'},
+  {nome:'Teresina',uf:'PI',nivel:'Capital Regional A',cor:'#5B9BD5',regiao:'Fortaleza',pop:866000,desc:'Capital piauiense. Polo regional de saúde e educação.'},
+  {nome:'São Luís',uf:'MA',nivel:'Capital Regional A',cor:'#5B9BD5',regiao:'Belém',pop:1100000,desc:'Capital maranhense. Patrimônio histórico e polo portuário (Porto do Itaqui).'},
+  {nome:'Cuiabá',uf:'MT',nivel:'Capital Regional A',cor:'#5B9BD5',regiao:'Brasília',pop:650000,desc:'Capital mato-grossense. Porta de entrada do Pantanal e polo do agronegócio.'},
+  {nome:'Campo Grande',uf:'MS',nivel:'Capital Regional A',cor:'#5B9BD5',regiao:'São Paulo',pop:906000,desc:'Capital sul-mato-grossense. Centro do agronegócio pecuário.'},
+  {nome:'Aracaju',uf:'SE',nivel:'Capital Regional A',cor:'#5B9BD5',regiao:'Salvador',pop:664000,desc:'Capital sergipana. Polo petrolífero e turístico.'},
+  {nome:'Ribeirão Preto',uf:'SP',nivel:'Capital Regional B',cor:'#5B9BD5',regiao:'São Paulo',pop:700000,desc:'Polo agroindustrial do interior paulista. Centro médico e universitário de referência.'},
+  {nome:'Uberlândia',uf:'MG',nivel:'Capital Regional B',cor:'#5B9BD5',regiao:'Belo Horizonte',pop:690000,desc:'Polo logístico e comercial do Triângulo Mineiro.'},
+  {nome:'Londrina',uf:'PR',nivel:'Capital Regional B',cor:'#5B9BD5',regiao:'Curitiba',pop:570000,desc:'Polo universitário e agroindustrial do norte do Paraná.'},
+  {nome:'Maringá',uf:'PR',nivel:'Capital Regional B',cor:'#5B9BD5',regiao:'Curitiba',pop:430000,desc:'Polo agroindustrial e tecnológico do noroeste paranaense.'},
+  {nome:'Joinville',uf:'SC',nivel:'Capital Regional C',cor:'#5B9BD5',regiao:'Curitiba',pop:597000,desc:'Maior cidade de Santa Catarina. Polo metal-mecânico e polo têxtil.'},
+  {nome:'Blumenau',uf:'SC',nivel:'Capital Regional C',cor:'#5B9BD5',regiao:'Florianópolis',pop:348000,desc:'Polo têxtil e tecnológico do Vale do Itajaí.'},
+  {nome:'Sobral',uf:'CE',nivel:'Centro Sub-Regional A',cor:'#E07B3A',regiao:'Fortaleza',pop:210000,desc:'Polo regional do sertão cearense. Destaque em educação e serviços de saúde.'},
+  {nome:'Petrolina',uf:'PE',nivel:'Centro Sub-Regional A',cor:'#E07B3A',regiao:'Recife',pop:335000,desc:'Polo fruticultor irrigado do São Francisco. Conurba com Juazeiro – BA.'},
+  {nome:'Imperatriz',uf:'MA',nivel:'Centro Sub-Regional A',cor:'#E07B3A',regiao:'Belém',pop:259000,desc:'Polo regional do sul maranhense. Segundo maior município do Maranhão.'},
+  {nome:'Foz do Iguaçu',uf:'PR',nivel:'Centro Sub-Regional A',cor:'#E07B3A',regiao:'Curitiba',pop:258000,desc:'Polo turístico de projeção internacional. Tríplice fronteira com Argentina e Paraguai.'},
+  {nome:'Santa Maria',uf:'RS',nivel:'Centro Sub-Regional A',cor:'#E07B3A',regiao:'Porto Alegre',pop:277000,desc:'Polo militar, universitário e de serviços do centro do Rio Grande do Sul.'},
+  {nome:'Santarém',uf:'PA',nivel:'Centro Sub-Regional A',cor:'#E07B3A',regiao:'Belém',pop:295000,desc:'Polo fluvial e agrícola do oeste paraense. Porto de escoamento da soja.'},
+  {nome:'Caruaru',uf:'PE',nivel:'Centro Sub-Regional A',cor:'#E07B3A',regiao:'Recife',pop:356000,desc:'Capital do Agreste pernambucano. Polo têxtil e de confecções.'},
+];
+
+const chipLabels = ['Todos','Metrópole','Capital Regional','Sub-Regional','Zona','Local'];
+const chipFilter = ['','Metrópole','Capital Regional','Sub-Regional','Zona','Local'];
+let activeChip = 0;
+
+// ══════════════════════════════════════════
+// NAV SCROLL
+// ══════════════════════════════════════════
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+function scrollTo(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
 }
 
-// HIERARCHY BARS
-const hierData = [
-  {label:'Grande Metrópole Nacional', n:3,  color:'#534AB7', pct: 3/4479},
-  {label:'Metrópole Nacional',        n:3,  color:'#7F77DD', pct: 3/4479},
-  {label:'Metrópole',                 n:9,  color:'#AFA9EC', pct: 9/4479},
-  {label:'Capital Regional A',        n:11, color:'#1D9E75', pct:11/4479},
-  {label:'Capital Regional B',        n:25, color:'#5DCAA5', pct:25/4479},
-  {label:'Capital Regional C',        n:86, color:'#9FE1CB', pct:86/4479},
-  {label:'Centro Sub-Regional A',     n:75, color:'#378ADD', pct:75/4479},
-  {label:'Centro Sub-Regional B',     n:280,color:'#85B7EB', pct:280/4479},
-  {label:'Centro de Zona A',          n:192,color:'#BA7517', pct:192/4479},
-  {label:'Centro de Zona B',          n:413,color:'#EF9F27', pct:413/4479},
-  {label:'Centro Local',              n:4479,color:'#888780',pct:1},
-];
-const hbars = document.getElementById('hbars');
-hierData.forEach(d => {
-  const row = document.createElement('div'); row.className = 'h-row';
-  const w = Math.max(d.pct * 100, 1.5).toFixed(1);
-  row.innerHTML = `<span class="h-label">${d.label}</span><div class="h-bar-wrap"><div class="h-bar" style="width:${w}%;background:${d.color}"></div></div><span class="h-count">${d.n.toLocaleString('pt-BR')}</span>`;
-  hbars.appendChild(row);
+// ══════════════════════════════════════════
+// COUNTER ANIMATION
+// ══════════════════════════════════════════
+function animateCount(el, target, duration) {
+  let start = 0, startTime = null;
+  function step(ts) {
+    if (!startTime) startTime = ts;
+    const p = Math.min((ts - startTime) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(ease * target).toLocaleString('pt-BR');
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+setTimeout(() => {
+  animateCount(document.getElementById('cnt1'), 15, 1200);
+  animateCount(document.getElementById('cnt2'), 122, 1500);
+  animateCount(document.getElementById('cnt3'), 355, 1800);
+  animateCount(document.getElementById('cnt4'), 4479, 2200);
+}, 800);
+
+// ══════════════════════════════════════════
+// HIERARCHY PYRAMID
+// ══════════════════════════════════════════
+const pyramid = document.getElementById('pyramid');
+tiers.forEach(t => {
+  const div = document.createElement('div');
+  div.className = `hier-tier ${t.cls}`;
+  div.setAttribute('data-id', t.id);
+  const pct = Math.max((t.n / 4479) * 100, 2);
+  div.innerHTML = `
+    <div class="tier-row">
+      <div class="tier-info">
+        <div class="tier-name">${t.label}</div>
+        <div class="tier-n" style="color:${t.color}">${t.n.toLocaleString('pt-BR')}</div>
+      </div>
+    </div>
+    <div class="tier-bar"><div class="tier-fill" style="width:${pct}%;background:${t.color}"></div></div>`;
+  div.addEventListener('click', () => selectTier(t, div));
+  pyramid.appendChild(div);
 });
 
-// TABLE DATA
-const cidades = [
-  {nome:'São Paulo',uf:'SP',nivel:'Grande Metrópole Nacional',regiao:'São Paulo',pop:22000000,bc:'b-m-g'},
-  {nome:'Rio de Janeiro',uf:'RJ',nivel:'Grande Metrópole Nacional',regiao:'Rio de Janeiro',pop:13000000,bc:'b-m-g'},
-  {nome:'Brasília',uf:'DF',nivel:'Grande Metrópole Nacional',regiao:'Brasília',pop:3100000,bc:'b-m-g'},
-  {nome:'Manaus',uf:'AM',nivel:'Metrópole Nacional',regiao:'Manaus',pop:2200000,bc:'b-m-n'},
-  {nome:'Belém',uf:'PA',nivel:'Metrópole Nacional',regiao:'Belém',pop:2500000,bc:'b-m-n'},
-  {nome:'Fortaleza',uf:'CE',nivel:'Metrópole Nacional',regiao:'Fortaleza',pop:3900000,bc:'b-m-n'},
-  {nome:'Recife',uf:'PE',nivel:'Metrópole',regiao:'Recife',pop:4000000,bc:'b-m'},
-  {nome:'Salvador',uf:'BA',nivel:'Metrópole',regiao:'Salvador',pop:3900000,bc:'b-m'},
-  {nome:'Belo Horizonte',uf:'MG',nivel:'Metrópole',regiao:'Belo Horizonte',pop:6000000,bc:'b-m'},
-  {nome:'Curitiba',uf:'PR',nivel:'Metrópole',regiao:'Curitiba',pop:3700000,bc:'b-m'},
-  {nome:'Goiânia',uf:'GO',nivel:'Metrópole',regiao:'Goiânia',pop:2600000,bc:'b-m'},
-  {nome:'Porto Alegre',uf:'RS',nivel:'Metrópole',regiao:'Porto Alegre',pop:4300000,bc:'b-m'},
-  {nome:'Campinas',uf:'SP',nivel:'Metrópole',regiao:'São Paulo',pop:3200000,bc:'b-m'},
-  {nome:'Florianópolis',uf:'SC',nivel:'Metrópole',regiao:'Florianópolis',pop:1100000,bc:'b-m'},
-  {nome:'Vitória',uf:'ES',nivel:'Metrópole',regiao:'Vitória',pop:2100000,bc:'b-m'},
-  {nome:'Maceió',uf:'AL',nivel:'Capital Regional A',regiao:'Recife',pop:1000000,bc:'b-ca'},
-  {nome:'Natal',uf:'RN',nivel:'Capital Regional A',regiao:'Fortaleza',pop:900000,bc:'b-ca'},
-  {nome:'João Pessoa',uf:'PB',nivel:'Capital Regional A',regiao:'Recife',pop:800000,bc:'b-ca'},
-  {nome:'Teresina',uf:'PI',nivel:'Capital Regional A',regiao:'Fortaleza',pop:866000,bc:'b-ca'},
-  {nome:'São Luís',uf:'MA',nivel:'Capital Regional A',regiao:'Belém',pop:1100000,bc:'b-ca'},
-  {nome:'Porto Velho',uf:'RO',nivel:'Capital Regional A',regiao:'Manaus',pop:500000,bc:'b-ca'},
-  {nome:'Cuiabá',uf:'MT',nivel:'Capital Regional A',regiao:'Brasília',pop:650000,bc:'b-ca'},
-  {nome:'Campo Grande',uf:'MS',nivel:'Capital Regional A',regiao:'São Paulo',pop:906000,bc:'b-ca'},
-  {nome:'Aracaju',uf:'SE',nivel:'Capital Regional A',regiao:'Salvador',pop:664000,bc:'b-ca'},
-  {nome:'Ribeirão Preto',uf:'SP',nivel:'Capital Regional B',regiao:'São Paulo',pop:700000,bc:'b-cb'},
-  {nome:'Santos',uf:'SP',nivel:'Capital Regional B',regiao:'São Paulo',pop:433000,bc:'b-cb'},
-  {nome:'Uberlândia',uf:'MG',nivel:'Capital Regional B',regiao:'Belo Horizonte',pop:690000,bc:'b-cb'},
-  {nome:'Londrina',uf:'PR',nivel:'Capital Regional B',regiao:'Curitiba',pop:570000,bc:'b-cb'},
-  {nome:'Caxias do Sul',uf:'RS',nivel:'Capital Regional B',regiao:'Porto Alegre',pop:524000,bc:'b-cb'},
-  {nome:'Maringá',uf:'PR',nivel:'Capital Regional B',regiao:'Curitiba',pop:430000,bc:'b-cb'},
-  {nome:'Macapá',uf:'AP',nivel:'Capital Regional B',regiao:'Belém',pop:503000,bc:'b-cb'},
-  {nome:'Boa Vista',uf:'RR',nivel:'Capital Regional B',regiao:'Manaus',pop:399000,bc:'b-cb'},
-  {nome:'Rio Branco',uf:'AC',nivel:'Capital Regional B',regiao:'Manaus',pop:413000,bc:'b-cb'},
-  {nome:'Palmas',uf:'TO',nivel:'Capital Regional B',regiao:'Brasília',pop:291000,bc:'b-cb'},
-  {nome:'Joinville',uf:'SC',nivel:'Capital Regional C',regiao:'Curitiba',pop:597000,bc:'b-cc'},
-  {nome:'Blumenau',uf:'SC',nivel:'Capital Regional C',regiao:'Florianópolis',pop:348000,bc:'b-cc'},
-  {nome:'Juiz de Fora',uf:'MG',nivel:'Capital Regional C',regiao:'Rio de Janeiro',pop:573000,bc:'b-cc'},
-  {nome:'Feira de Santana',uf:'BA',nivel:'Capital Regional C',regiao:'Salvador',pop:620000,bc:'b-cc'},
-  {nome:'Pelotas',uf:'RS',nivel:'Capital Regional C',regiao:'Porto Alegre',pop:341000,bc:'b-cc'},
-  {nome:'Chapecó',uf:'SC',nivel:'Capital Regional C',regiao:'Porto Alegre',pop:224000,bc:'b-cc'},
-  {nome:'Bauru',uf:'SP',nivel:'Capital Regional C',regiao:'São Paulo',pop:374000,bc:'b-cc'},
-  {nome:'São José do Rio Preto',uf:'SP',nivel:'Capital Regional C',regiao:'São Paulo',pop:456000,bc:'b-cc'},
-  {nome:'Montes Claros',uf:'MG',nivel:'Capital Regional C',regiao:'Belo Horizonte',pop:413000,bc:'b-cc'},
-  {nome:'Sobral',uf:'CE',nivel:'Centro Sub-Regional A',regiao:'Fortaleza',pop:210000,bc:'b-sa'},
-  {nome:'Juazeiro do Norte',uf:'CE',nivel:'Centro Sub-Regional A',regiao:'Fortaleza',pop:570000,bc:'b-sa'},
-  {nome:'Petrolina',uf:'PE',nivel:'Centro Sub-Regional A',regiao:'Recife',pop:335000,bc:'b-sa'},
-  {nome:'Imperatriz',uf:'MA',nivel:'Centro Sub-Regional A',regiao:'Belém',pop:259000,bc:'b-sa'},
-  {nome:'Foz do Iguaçu',uf:'PR',nivel:'Centro Sub-Regional A',regiao:'Curitiba',pop:258000,bc:'b-sa'},
-  {nome:'Santa Maria',uf:'RS',nivel:'Centro Sub-Regional A',regiao:'Porto Alegre',pop:277000,bc:'b-sa'},
-  {nome:'Passo Fundo',uf:'RS',nivel:'Centro Sub-Regional A',regiao:'Porto Alegre',pop:204000,bc:'b-sa'},
-  {nome:'São Carlos',uf:'SP',nivel:'Centro Sub-Regional A',regiao:'São Paulo',pop:247000,bc:'b-sa'},
-  {nome:'Cascavel',uf:'PR',nivel:'Centro Sub-Regional A',regiao:'Curitiba',pop:333000,bc:'b-sa'},
-  {nome:'Patos',uf:'PB',nivel:'Centro Sub-Regional B',regiao:'Recife',pop:108000,bc:'b-sb'},
-  {nome:'Itabuna',uf:'BA',nivel:'Centro Sub-Regional B',regiao:'Salvador',pop:212000,bc:'b-sb'},
-  {nome:'Divinópolis',uf:'MG',nivel:'Centro de Zona A',regiao:'Belo Horizonte',pop:235000,bc:'b-za'},
-  {nome:'Patos de Minas',uf:'MG',nivel:'Centro de Zona A',regiao:'Belo Horizonte',pop:150000,bc:'b-za'},
-  {nome:'Sinop',uf:'MT',nivel:'Centro de Zona A',regiao:'Brasília',pop:131000,bc:'b-za'},
-  {nome:'Santarém',uf:'PA',nivel:'Centro Sub-Regional A',regiao:'Belém',pop:295000,bc:'b-sa'},
-  {nome:'Caruaru',uf:'PE',nivel:'Centro Sub-Regional A',regiao:'Recife',pop:356000,bc:'b-sa'},
+function selectTier(t, el) {
+  document.querySelectorAll('.hier-tier').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+  const panel = document.getElementById('detail-panel');
+  panel.innerHTML = `
+    <span class="detail-badge" style="background:${t.color}22;color:${t.color}">${t.short}</span>
+    <div class="detail-heading" style="color:${t.color}">${t.n.toLocaleString('pt-BR')} <span style="color:var(--text);font-size:18px;font-weight:400">cidades</span></div>
+    <p class="detail-text">${t.desc}</p>
+    <div style="margin-bottom:10px;font-size:12px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase">Exemplos</div>
+    <div class="detail-cities">${t.cities.map(c => `<span class="city-tag">${c}</span>`).join('')}</div>`;
+}
+
+// ══════════════════════════════════════════
+// CHIPS
+// ══════════════════════════════════════════
+const chipsEl = document.getElementById('chips');
+chipLabels.forEach((l, i) => {
+  const b = document.createElement('button');
+  b.className = 'chip' + (i === 0 ? ' active' : '');
+  b.textContent = l;
+  b.addEventListener('click', () => {
+    activeChip = i;
+    document.querySelectorAll('.chip').forEach((c, j) => c.classList.toggle('active', j === i));
+    filterCities();
+  });
+  chipsEl.appendChild(b);
+});
+
+// ══════════════════════════════════════════
+// CITY GRID
+// ══════════════════════════════════════════
+function filterCities() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const f = chipFilter[activeChip];
+  const filtered = cidades.filter(c =>
+    (!q || c.nome.toLowerCase().includes(q) || c.uf.toLowerCase().includes(q)) &&
+    (!f || c.nivel.includes(f))
+  );
+  document.getElementById('results-count').textContent = `${filtered.length} cidade${filtered.length !== 1 ? 's' : ''} encontrada${filtered.length !== 1 ? 's' : ''}`;
+  const grid = document.getElementById('city-grid');
+  grid.innerHTML = '';
+  filtered.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'city-card';
+    card.style.setProperty('--card-color', c.cor);
+    card.innerHTML = `
+      <div class="city-card-name">${c.nome}</div>
+      <div class="city-card-uf">${c.uf} · Influência: ${c.regiao}</div>
+      <div class="city-card-nivel">
+        <div class="nivel-dot" style="background:${c.cor}"></div>
+        <span class="nivel-text">${c.nivel}</span>
+      </div>
+      <div class="city-card-pop">${c.pop.toLocaleString('pt-BR')} hab.</div>`;
+    card.style.cssText += `--card-color:${c.cor}`;
+    card.querySelector('.city-card-name').style.color = 'var(--text)';
+    card.addEventListener('mouseenter', () => { card.style.borderColor = c.cor + '55'; });
+    card.addEventListener('mouseleave', () => { card.style.borderColor = ''; });
+    card.addEventListener('click', () => openModal(c));
+    grid.appendChild(card);
+  });
+}
+filterCities();
+
+// ══════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════
+function openModal(c) {
+  const content = document.getElementById('modal-content');
+  content.innerHTML = `
+    <span class="modal-badge" style="background:${c.cor}22;color:${c.cor}">${c.nivel}</span>
+    <div class="modal-city">${c.nome}</div>
+    <div class="modal-uf">${c.uf} · Região de influência: ${c.regiao}</div>
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <div class="modal-stat-label">População</div>
+        <div class="modal-stat-value">${(c.pop/1000000).toFixed(1)}M</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat-label">Nível hierárquico</div>
+        <div class="modal-stat-value" style="font-size:14px;color:${c.cor}">${c.nivel}</div>
+      </div>
+    </div>
+    <p class="modal-desc">${c.desc}</p>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ══════════════════════════════════════════
+// CHARTS
+// ══════════════════════════════════════════
+Chart.defaults.color = '#888780';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+new Chart(document.getElementById('chart-dist'), {
+  type: 'bar',
+  data: {
+    labels: ['Metrópoles', 'Capitais Regionais', 'Centros Sub-Reg.', 'Centros de Zona', 'Centros Locais'],
+    datasets: [{
+      data: [15, 122, 355, 605, 4479],
+      backgroundColor: ['#E8C547','#4CAF82','#5B9BD5','#E07B3A','#8B74D4'],
+      borderRadius: 6, borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { callback: v => v.toLocaleString('pt-BR') } }, x: { grid: { display: false } } },
+    animation: { duration: 1000, easing: 'easeOutQuart' }
+  }
+});
+
+new Chart(document.getElementById('chart-regioes'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Sudeste','Sul','Nordeste','Norte','Centro-Oeste'],
+    datasets: [{ data: [7,3,3,2,1], backgroundColor: ['#E8C547','#4CAF82','#5B9BD5','#E07B3A','#8B74D4'], borderWidth: 2, borderColor: '#1a1a17' }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'right', labels: { padding: 14, font: { size: 12 } } } },
+    cutout: '62%',
+    animation: { duration: 1000 }
+  }
+});
+
+new Chart(document.getElementById('chart-evolucao'), {
+  type: 'line',
+  data: {
+    labels: ['1966','1978','1993','2007','2018'],
+    datasets: [{
+      label: 'Metrópoles',
+      data: [2,8,9,12,15],
+      borderColor: '#E8C547',
+      backgroundColor: 'rgba(232,197,71,0.08)',
+      tension: 0.3, pointRadius: 6,
+      pointBackgroundColor: '#E8C547',
+      pointBorderColor: '#0a0a08',
+      pointBorderWidth: 2,
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, max: 18, ticks: { stepSize: 3 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chart-estados'), {
+  type: 'bar',
+  data: {
+    labels: ['SP','MG','PR','RS','BA','SC','GO','CE','RJ','PE'],
+    datasets: [{ data: [18,14,10,9,8,7,7,6,5,5], backgroundColor: '#5B9BD5', borderRadius: 4 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { stepSize: 2 } }, y: { grid: { display: false } } }
+  }
+});
+
+// ══════════════════════════════════════════
+// NETWORK CANVAS
+// ══════════════════════════════════════════
+const canvas = document.getElementById('network-canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+const nodes = [
+  // Grandes metrópoles
+  {id:'sp', label:'São Paulo', x:.5, y:.5, r:22, color:'#E8C547', tier:0},
+  {id:'rj', label:'Rio de Janeiro', x:.65, y:.62, r:18, color:'#E8C547', tier:0},
+  {id:'bsb', label:'Brasília', x:.46, y:.36, r:15, color:'#E8C547', tier:0},
+  // Metrópoles nac
+  {id:'for', label:'Fortaleza', x:.68, y:.2, r:13, color:'#f0d070', tier:1},
+  {id:'bel', label:'Belém', x:.58, y:.13, r:12, color:'#f0d070', tier:1},
+  {id:'man', label:'Manaus', x:.27, y:.18, r:12, color:'#f0d070', tier:1},
+  // Metrópoles
+  {id:'bh', label:'Belo Horizonte', x:.6, y:.5, r:14, color:'#4CAF82', tier:2},
+  {id:'cwb', label:'Curitiba', x:.55, y:.67, r:13, color:'#4CAF82', tier:2},
+  {id:'poa', label:'Porto Alegre', x:.52, y:.79, r:13, color:'#4CAF82', tier:2},
+  {id:'rec', label:'Recife', x:.82, y:.32, r:13, color:'#4CAF82', tier:2},
+  {id:'ssa', label:'Salvador', x:.75, y:.43, r:13, color:'#4CAF82', tier:2},
+  {id:'gyn', label:'Goiânia', x:.42, y:.44, r:12, color:'#4CAF82', tier:2},
+  {id:'fln', label:'Florianópolis', x:.56, y:.73, r:11, color:'#4CAF82', tier:2},
+  {id:'vit', label:'Vitória', x:.7, y:.55, r:11, color:'#4CAF82', tier:2},
+  {id:'cam', label:'Campinas', x:.52, y:.55, r:12, color:'#4CAF82', tier:2},
+  // Capitais regionais
+  {id:'mcz', label:'Maceió', x:.78, y:.38, r:9, color:'#5B9BD5', tier:3},
+  {id:'nat', label:'Natal', x:.84, y:.26, r:9, color:'#5B9BD5', tier:3},
+  {id:'the', label:'Teresina', x:.7, y:.26, r:9, color:'#5B9BD5', tier:3},
+  {id:'slz', label:'São Luís', x:.63, y:.19, r:9, color:'#5B9BD5', tier:3},
+  {id:'cgr', label:'Campo Grande', x:.37, y:.56, r:9, color:'#5B9BD5', tier:3},
+  {id:'cba', label:'Cuiabá', x:.32, y:.44, r:9, color:'#5B9BD5', tier:3},
+  {id:'pvh', label:'Porto Velho', x:.24, y:.3, r:9, color:'#5B9BD5', tier:3},
+  // Sub-regionais e zonas (menores)
+  {id:'sob', label:'Sobral', x:.72, y:.22, r:7, color:'#E07B3A', tier:4},
+  {id:'pet', label:'Petrolina', x:.74, y:.36, r:7, color:'#E07B3A', tier:4},
+  {id:'imp', label:'Imperatriz', x:.62, y:.22, r:7, color:'#E07B3A', tier:4},
+  {id:'foz', label:'Foz do Iguaçu', x:.47, y:.72, r:7, color:'#E07B3A', tier:4},
+  {id:'stm', label:'Santarém', x:.42, y:.17, r:7, color:'#E07B3A', tier:4},
+  {id:'car', label:'Caruaru', x:.8, y:.35, r:7, color:'#E07B3A', tier:4},
 ];
 
-const ufs = [...new Set(cidades.map(c => c.uf))].sort();
-const fuf = document.getElementById('f-uf');
-ufs.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; fuf.appendChild(o); });
+const edges = [
+  ['bsb','sp'],['bsb','bel'],['bsb','man'],['sp','rj'],['sp','bh'],['sp','cwb'],
+  ['sp','cam'],['rj','ssa'],['rj','vit'],['bel','slz'],['bel','stm'],['bel','imp'],
+  ['for','nat'],['for','the'],['for','slz'],['for','sob'],['man','pvh'],
+  ['rec','mcz'],['rec','nat'],['rec','pet'],['rec','car'],['ssa','rec'],['ssa','mcz'],
+  ['bh','gyn'],['bh','vit'],['gyn','cgr'],['gyn','cba'],['cwb','poa'],['cwb','fln'],
+  ['cwb','foz'],['poa','fln'],['cba','pvh'],
+];
 
-function filterTable() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const nivel = document.getElementById('f-nivel').value;
-  const uf = document.getElementById('f-uf').value;
-  const filtered = cidades.filter(c =>
-    (!q || c.nome.toLowerCase().includes(q)) &&
-    (!nivel || c.nivel === nivel) &&
-    (!uf || c.uf === uf)
-  );
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
-  filtered.forEach(c => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-weight:500">${c.nome}</td><td>${c.uf}</td><td><span class="badge ${c.bc}">${c.nivel}</span></td><td style="color:var(--text2)">${c.regiao}</td><td style="text-align:right;color:var(--text2)">${c.pop.toLocaleString('pt-BR')}</td>`;
-    tbody.appendChild(tr);
-  });
-  document.getElementById('count-tag').textContent = `${filtered.length} cidades`;
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  W = canvas.width = rect.width;
+  H = canvas.height = 520;
 }
-filterTable();
 
-// CHARTS
-let chartsInited = false;
-function initCharts() {
-  if (chartsInited) return;
-  chartsInited = true;
+let hoveredNode = null;
+let animFrame = 0;
 
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const textColor = isDark ? '#b4b2a9' : '#888780';
+function drawNetwork() {
+  animFrame++;
+  ctx.clearRect(0, 0, W, H);
 
-  // Chart 1 — distribuição por nível
-  const labels1 = ['Metrópoles','Cap. Regionais','Centros Sub-Reg.','Centros de Zona','Centros Locais'];
-  const data1 = [15, 122, 355, 605, 4479];
-  const colors1 = ['#534AB7','#1D9E75','#378ADD','#BA7517','#888780'];
-  const leg1 = document.getElementById('leg1');
-  labels1.forEach((l,i) => {
-    const s = document.createElement('span'); s.className = 'leg-item';
-    s.innerHTML = `<span class="leg-dot" style="background:${colors1[i]}"></span>${l}: ${data1[i].toLocaleString('pt-BR')}`;
-    leg1.appendChild(s);
+  // Background
+  ctx.fillStyle = '#111110';
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  // Map nodes to pixel coords
+  const nmap = {};
+  nodes.forEach(n => { nmap[n.id] = { x: n.x * W, y: n.y * H, ...n }; });
+
+  // Edges
+  edges.forEach(([a, b]) => {
+    const na = nmap[a], nb = nmap[b];
+    const isHovered = hoveredNode && (hoveredNode.id === a || hoveredNode.id === b);
+    ctx.beginPath();
+    ctx.moveTo(na.x, na.y);
+    ctx.lineTo(nb.x, nb.y);
+    ctx.strokeStyle = isHovered ? 'rgba(232,197,71,0.35)' : 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = isHovered ? 1.5 : 0.8;
+    ctx.stroke();
   });
-  new Chart(document.getElementById('chart1'), {
-    type: 'bar',
-    data: { labels: labels1, datasets: [{ data: data1, backgroundColor: colors1, borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, callback: v => v.toLocaleString('pt-BR') } }, x: { grid: { display: false }, ticks: { color: textColor } } }
+
+  // Nodes
+  nodes.forEach(n => {
+    const px = n.x * W, py = n.y * H;
+    const isH = hoveredNode && hoveredNode.id === n.id;
+    const r = n.r + (isH ? 4 : 0);
+    const pulse = n.tier === 0 ? Math.sin(animFrame * 0.03) * 4 : 0;
+
+    if (n.tier === 0 && !isH) {
+      ctx.beginPath();
+      ctx.arc(px, py, r + 8 + pulse, 0, Math.PI * 2);
+      ctx.fillStyle = n.color + '14';
+      ctx.fill();
+    }
+
+    const grad = ctx.createRadialGradient(px - r * .3, py - r * .3, 0, px, py, r);
+    grad.addColorStop(0, n.color + 'ee');
+    grad.addColorStop(1, n.color + '88');
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fillStyle = isH ? n.color : grad;
+    ctx.fill();
+
+    if (isH) {
+      ctx.beginPath();
+      ctx.arc(px, py, r + 6, 0, Math.PI * 2);
+      ctx.strokeStyle = n.color + '44';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Labels for large nodes or hovered
+    if (n.tier <= 1 || isH) {
+      ctx.font = `${isH ? 600 : 500} ${isH ? 13 : 11}px 'DM Sans', sans-serif`;
+      ctx.fillStyle = '#f0ede6';
+      ctx.textAlign = 'center';
+      ctx.fillText(n.label, px, py + r + 14);
     }
   });
 
-  // Chart 2 — metrópoles por região
-  const labels2 = ['Sudeste','Sul','Nordeste','Norte','Centro-Oeste'];
-  const data2 = [7, 3, 3, 2, 1];
-  const colors2 = ['#534AB7','#1D9E75','#378ADD','#BA7517','#888780'];
-  const leg2 = document.getElementById('leg2');
-  labels2.forEach((l,i) => {
-    const s = document.createElement('span'); s.className = 'leg-item';
-    s.innerHTML = `<span class="leg-dot" style="background:${colors2[i]}"></span>${l}: ${data2[i]}`;
-    leg2.appendChild(s);
-  });
-  new Chart(document.getElementById('chart2'), {
-    type: 'bar',
-    data: { labels: labels2, datasets: [{ data: data2, backgroundColor: colors2, borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, max: 9, ticks: { stepSize: 1, color: textColor }, grid: { color: gridColor } }, x: { grid: { display: false }, ticks: { color: textColor } } }
-    }
-  });
-
-  // Chart 3 — evolução histórica
-  const leg3 = document.getElementById('leg3');
-  const ls = document.createElement('span'); ls.className = 'leg-item';
-  ls.innerHTML = `<span class="leg-dot" style="background:#534AB7"></span>Nº de metrópoles por edição da REGIC`;
-  leg3.appendChild(ls);
-  new Chart(document.getElementById('chart3'), {
-    type: 'line',
-    data: {
-      labels: ['REGIC 1966','REGIC 1978','REGIC 1993','REGIC 2007','REGIC 2018'],
-      datasets: [{ data: [2, 8, 9, 12, 15], borderColor: '#534AB7', backgroundColor: isDark ? 'rgba(83,74,183,0.15)' : 'rgba(83,74,183,0.08)', tension: 0.3, pointRadius: 5, pointBackgroundColor: '#534AB7', fill: true }]
-    },
-    options: { responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, max: 18, ticks: { stepSize: 3, color: textColor }, grid: { color: gridColor } }, x: { grid: { display: false }, ticks: { color: textColor } } }
-    }
-  });
-
-  // Chart 4 — capitais regionais por estado (horizontal)
-  const labels4 = ['SP','MG','PR','RS','BA','SC','GO','CE','RJ','PE'];
-  const data4 =   [18,  14,  10,  9,   8,   7,   7,   6,   5,   5];
-  const leg4 = document.getElementById('leg4');
-  const ls4 = document.createElement('span'); ls4.className = 'leg-item';
-  ls4.innerHTML = `<span class="leg-dot" style="background:#1D9E75"></span>Nº de capitais regionais (A+B+C) por estado`;
-  leg4.appendChild(ls4);
-  new Chart(document.getElementById('chart4'), {
-    type: 'bar',
-    data: { labels: labels4, datasets: [{ data: data4, backgroundColor: '#1D9E75', borderRadius: 4 }] },
-    options: {
-      indexAxis: 'y',
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { x: { beginAtZero: true, grid: { color: gridColor }, ticks: { stepSize: 2, color: textColor } }, y: { grid: { display: false }, ticks: { color: textColor } } }
-    }
-  });
+  requestAnimationFrame(drawNetwork);
 }
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * (W / rect.width);
+  const my = (e.clientY - rect.top) * (H / rect.height);
+  hoveredNode = null;
+  for (const n of nodes) {
+    const dx = mx - n.x * W, dy = my - n.y * H;
+    if (Math.sqrt(dx*dx + dy*dy) < n.r + 8) { hoveredNode = n; break; }
+  }
+  canvas.style.cursor = hoveredNode ? 'pointer' : 'default';
+  const tip = document.getElementById('net-tooltip');
+  if (hoveredNode) {
+    tip.style.display = 'block';
+    tip.style.left = (e.clientX - canvas.getBoundingClientRect().left + 12) + 'px';
+    tip.style.top = (e.clientY - canvas.getBoundingClientRect().top - 10) + 'px';
+    const tierNames = ['Grande Metrópole Nacional','Metrópole Nacional','Metrópole','Capital Regional','Sub-Regional / Zona'];
+    tip.innerHTML = `<strong>${hoveredNode.label}</strong><br><span style="color:var(--text3);font-size:11px">${tierNames[hoveredNode.tier]}</span>`;
+  } else { tip.style.display = 'none'; }
+});
+canvas.addEventListener('mouseleave', () => { hoveredNode = null; document.getElementById('net-tooltip').style.display = 'none'; });
+
+resizeCanvas();
+drawNetwork();
+window.addEventListener('resize', resizeCanvas);
+
+// ══════════════════════════════════════════
+// TIMELINE
+// ══════════════════════════════════════════
+const tlData = [
+  { year:'1966', title:'Primeira edição', desc:'A REGIC surge como instrumento do planejamento territorial brasileiro. Na época, apenas São Paulo e Rio de Janeiro eram classificadas como metrópoles nacionais, refletindo a concentração urbana do período.', stat:'2 metrópoles' },
+  { year:'1978', title:'Expansão da rede', desc:'A industrialização acelerada e o êxodo rural intenso transformam rapidamente o mapa urbano. O número de metrópoles salta para 8, incorporando capitais regionais que ganharam massa crítica durante o "milagre econômico".', stat:'8 metrópoles' },
+  { year:'1993', title:'Consolidação democrática', desc:'Primeira edição pós-Constituição de 1988. A descentralização fiscal impulsiona cidades médias. A rede urbana mostra maior diversificação regional, com crescimento expressivo do Centro-Oeste ligado ao agronegócio.', stat:'9 metrópoles' },
+  { year:'2007', title:'Brasil emergente', desc:'O boom das commodities e os programas habitacionais transformam o interior do país. Cidades médias crescem aceleradamente. A rede ganha 3 novas metrópoles, refletindo a consolidação de polos regionais.', stat:'12 metrópoles' },
+  { year:'2018', title:'Quinta edição — resultados definitivos', desc:'Campinas, Florianópolis e Vitória ingressam no grupo das metrópoles. O digital transforma os fluxos de gestão. A pesquisa incorpora pela primeira vez o conceito de Arranjos Populacionais, capturando a fragmentação político-administrativa das grandes cidades.', stat:'15 metrópoles' },
+];
+
+const tlEl = document.getElementById('timeline');
+tlData.forEach((t, i) => {
+  const div = document.createElement('div');
+  div.className = 'tl-item';
+  div.style.transitionDelay = `${i * 0.1}s`;
+  div.innerHTML = `
+    <div class="tl-dot"></div>
+    <div class="tl-year">${t.year}</div>
+    <div class="tl-title">${t.title}</div>
+    <p class="tl-desc">${t.desc}</p>
+    <div class="tl-stat"><strong>${t.stat}</strong></div>`;
+  tlEl.appendChild(div);
+});
+
+// ══════════════════════════════════════════
+// DOWNLOADS
+// ══════════════════════════════════════════
+const dlData = [
+  { icon:'📊', title:'Cidades', desc:'Base principal com hierarquia e dados de todos os centros urbanos. Atualizado em out/2020.',
+    links:[['XLSX','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Cidades_v2.xlsx'],['ODS','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Cidades_v2.ods']] },
+  { icon:'🔗', title:'Ligações entre cidades', desc:'Vínculos hierárquicos entre os centros urbanos da rede brasileira.',
+    links:[['XLSX','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Ligacoes_entre_Cidades.xlsx'],['ODS','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Ligacoes_entre_Cidades.ods']] },
+  { icon:'📍', title:'Municípios — hierarquia', desc:'Hierarquia e região de influência por município. Incluído em fev/2023.',
+    links:[['XLSX','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Municipios_Hierarquia_e_regiao.xlsx'],['ODS','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Municipios_Hierarquia_e_regiao.ods']] },
+  { icon:'🗺️', title:'Base vetorial (SIG)', desc:'Shapefiles geoespaciais para uso em QGIS, ArcGIS e outras ferramentas SIG.',
+    links:[['ZIP (SHP)','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_vetorial/REGIC2018_Bases_vetoriais.zip',true]] },
+  { icon:'👥', title:'Arranjos populacionais', desc:'Municípios integrantes dos arranjos populacionais. Atualizado em out/2020.',
+    links:[['XLSX','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Arranjos_Populacionais_v2.xlsx'],['ODS','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Arranjos_Populacionais_v2.ods']] },
+  { icon:'🔢', title:'Matriz de ligações', desc:'Matriz completa de influências entre todas as cidades. Incluído em jul/2020.',
+    links:[['XLSX','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Matriz_de_Ligacoes.xlsx'],['ODS','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Matriz_de_Ligacoes.ods']] },
+  { icon:'🛣️', title:'Rotas e distâncias', desc:'Distâncias rodoviárias, hidroviárias e aéreas entre municípios. Incluído em out/2023.',
+    links:[['XLSX','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Rotas_Brasil.xlsx']] },
+  { icon:'📅', title:'Hierarquias históricas', desc:'Compatibilização entre todas as edições REGIC 1966–2018. Incluído em dez/2024.',
+    links:[['XLSX','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/Tabela_de_hierarquias.xlsx'],['ODS','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/Tabela_de_hierarquias.ods']] },
+  { icon:'🌾', title:'Fluxos agropecuários', desc:'Fluxos de produção agropecuária entre municípios. Incluído em jul/2020.',
+    links:[['ZIP XLSX','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Fluxos_Agropecuarios_xlsx.zip'],['ZIP ODS','https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Fluxos_Agropecuarios_ods.zip']] },
+];
+
+const dlGrid = document.getElementById('dl-grid');
+dlData.forEach(d => {
+  const card = document.createElement('div');
+  card.className = 'dl-card reveal';
+  card.innerHTML = `
+    <div class="dl-icon">${d.icon}</div>
+    <div class="dl-title">${d.title}</div>
+    <div class="dl-desc">${d.desc}</div>
+    <div class="dl-btns">${d.links.map(([label, url, primary]) =>
+      `<a class="dl-btn${primary ? ' dl-btn-primary' : ''}" href="${url}" target="_blank">${label}</a>`
+    ).join('')}</div>`;
+  dlGrid.appendChild(card);
+});
+
+// ══════════════════════════════════════════
+// INTERSECTION OBSERVER (scroll reveals)
+// ══════════════════════════════════════════
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal, .tl-item').forEach(el => observer.observe(el));
 </script>
 </body>
 </html>
